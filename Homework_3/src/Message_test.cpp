@@ -1,5 +1,5 @@
+#include "Message.hh"
 #include <gtest/gtest.h>
-#include "Message.cpp"
 #include <iostream>
 #include <stdexcept>
 
@@ -15,7 +15,7 @@ TEST(Message_test, Correct_out_with_several_arguments_test)
 	result = stream.str();
 
 	//Assert
-	ASSERT_STREQ(expectedResult, result) << "Strings are not equal";
+	EXPECT_EQ(expectedResult, result);// << "Strings are not equal";
 }
 
 TEST(Message_test, Correct_out_with_extra_arguments_test)
@@ -30,22 +30,22 @@ TEST(Message_test, Correct_out_with_extra_arguments_test)
 	result = stream.str();
 
 	//Assert
-	EXPECT_STREQ(expectedResult, result) << "Strings are not equal";
+	EXPECT_EQ(expectedResult, result) << "Strings are not equal";
 }
 
 TEST(Message_test, Correct_out_Different_arguments_types_case_test)
 {
 	//Arrange
 	std::stringstream stream;
-	std::string expectedResult = "A 1 1.0 Hello false";
+	std::string expectedResult = "A 1 Hello 0";
 	std::string result;
 
 	//Act
-	Message(stream, "% % % % %", 'A', 1, 1.0, false);
+	Message(stream, "% % % %", 'A', 1, "Hello", false);
 	result = stream.str();
 
 	//Assert
-	EXPECT_STREQ(expectedResult, result) << "Strings are not equal";
+	EXPECT_EQ(expectedResult, result) << "Strings are not equal";
 }
 
 TEST(Message_test, Exception_with_lack_of_arguments_No_arguments_case_test)
@@ -80,3 +80,4 @@ TEST(Message_test, Exception_with_lack_of_arguments_Several_arguments_case_test)
 	//Assert
 	ASSERT_ANY_THROW(Message(stream, "Hello, % % world! %", "my", "bright"));
 }
+

@@ -8,11 +8,13 @@ void Message(std::ostream& stream, const char* str)
 		if (str[0] == '%')
 		{
 			//define the behavior in this case
-			throw invalid_argument("There are too much '%' simbols.");
+			throw std::invalid_argument("There are too much '%' simbols.");
 		}
 		else
 		{
-			stream << str[0];
+			if (str[0] != '\0')
+				stream << str[0];
+			else return;
 		}
 	}
 	while (*str++);
