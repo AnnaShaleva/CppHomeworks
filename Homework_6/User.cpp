@@ -1,7 +1,11 @@
+#include <string>
+#include <unordered_map>
+
 namespace My
 {
 	class User
 	{
+public:
 		int Id;
 		std::string Name;
 		std::string Surname;
@@ -22,8 +26,8 @@ public:
 
 		bool operator==(const User& user) const
 		{
-			return (Id = user.Id
-				&& Name = user.Name
+			return (Id == user.Id
+				&& Name == user.Name
 				&& Surname == user.Surname);
 		}
 	};
@@ -34,6 +38,7 @@ namespace std
 	template<>
 	class hash<My::User>
 	{
+		public:
 		std::size_t operator() (const My::User& x) const
 		{
 			return ((std::hash<int>()(x.Id)
@@ -41,4 +46,12 @@ namespace std
 				^ std::hash<std::string>()(x.Surname) << 1);
 		}
 	};
-}	
+}
+
+int main()
+{
+	std::unordered_map<My::User, std::string> myUsers = {
+		{{1, "Anna", "Shaleva"}, "Cat"},
+		{{2, "Ivan", "Petryakov"}, "Dog"}
+	};
+}
