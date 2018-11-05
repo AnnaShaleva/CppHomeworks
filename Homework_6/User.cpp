@@ -47,7 +47,7 @@ namespace std
 		}
 	};
 }
-
+/*
 int main()
 {
 	std::unordered_map<My::User, std::string> myUsers = {
@@ -55,3 +55,4 @@ int main()
 		{{2, "Ivan", "Petryakov"}, "Dog"}
 	};
 }
+*/

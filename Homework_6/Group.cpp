@@ -1,4 +1,4 @@
-#include "User.cpp"
+//#include "User.cpp"
 #include <unordered_set>
 #include <string>
 
@@ -24,12 +24,4 @@ public:
 	}
 };
 
-int main()
-{
-	auto users = std::unordered_set<My::User>{
-		{1, "Anna", "Shaeva"},
-		{2, "Ivan", "Petryakov"}
-	};
-	Group g = Group("405", 1, users);
-	return 0;
-}
+
