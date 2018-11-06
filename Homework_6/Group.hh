@@ -1,15 +1,14 @@
-//#include "User.cpp"
 #include <unordered_set>
 #include <string>
 
 class Group
 {
 public:
-	std::string Name;
 	int Id;
+	std::string Name;
 	std::unordered_set<My::User> Users;
 
-	Group(std::string name, int id, const std::unordered_set<My::User>& users)
+	Group(int id, std::string name, const std::unordered_set<My::User>& users)
 	{
 		Name = name;
 		Id = id;
