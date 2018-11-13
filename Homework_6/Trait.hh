@@ -5,7 +5,7 @@ template <class T>
 class Trait
 {
 public:
-	static int GetSize(T& source)
+	static int GetSize(const T& source)
 	{
 		return sizeof(source);
 	}
@@ -14,9 +14,13 @@ public:
 template<> class Trait<My::User>
 {
 public:
-	static int GetSize(My::User& source)
+	static int GetSize(const My::User& source)
 	{
-		return sizeof(source);
+		int result = 0;
+		result += sizeof(source.Id);
+		result += sizeof(source.Name);
+		result += sizeof(source.Surname);
+		return result;
 	}
 };
 
@@ -25,8 +29,12 @@ template<> class Trait<Group>
 public:
 	static int GetSize(Group& source)
 	{
-		//TODO: How to define the size for this element?
-		return sizeof(source);
+		int result = 0;
+		result += sizeof(source.Id);
+		result += sizeof(source.Name);
+		for(const auto& user: source.Users)
+			result += Trait<My::User>::GetSize(user);
+		return result;
 	}
 };
 
