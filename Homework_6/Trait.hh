@@ -11,6 +11,18 @@ public:
 	}
 };
 
+template<> class Trait<std::string>
+{
+	public:
+		static int GetSize(const std::string& source)
+		{
+			int result = 0;
+			for(int i = 0; i < source.length(); i++)
+				result += sizeof(source[i]);
+			return result;
+		}
+};
+
 template<> class Trait<My::User>
 {
 public:
@@ -18,8 +30,8 @@ public:
 	{
 		int result = 0;
 		result += sizeof(source.Id);
-		result += sizeof(source.Name);
-		result += sizeof(source.Surname);
+		result += Trait<std::string>::GetSize(source.Name);
+		result += Trait<std::string>::GetSize(source.Surname);
 		return result;
 	}
 };
@@ -31,7 +43,7 @@ public:
 	{
 		int result = 0;
 		result += sizeof(source.Id);
-		result += sizeof(source.Name);
+		result += Trait<std::string>::GetSize(source.Name);
 		for(const auto& user: source.Users)
 			result += Trait<My::User>::GetSize(user);
 		return result;
