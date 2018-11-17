@@ -5,54 +5,58 @@ class MyVector
 {
 public:
 	T* beginPointer;
-	const size_t maxSize = 100;
+	size_t maxSize;
 	size_t currentSize;
 
 public:
 	explicit MyVector()
 	{
 		currentSize = 0;
+		maxSize = 10;
 		beginPointer = new T[maxSize];
 	}
 
 	explicit MyVector(size_t count, const T& value)
 	{
-		if(count <= maxSize)
+		maxSize = 10;
+		while(count > maxSize)
+			maxSize = maxSize * 10;
+		currentSize = 0;
+		beginPointer = new T[maxSize];	
+		for (size_t i = 0; i < count; i++)
 		{
-			currentSize = 0;
-			beginPointer = new T[maxSize];	
-			for (size_t i = 0; i < count; i++)
-			{
-				beginPointer[i] = value;
-				currentSize ++;
-			}
+			beginPointer[i] = value;
+			currentSize ++;
 		}
 	}
 
 	explicit MyVector(size_t count)
 	{
-		if(count <= maxSize)
+		maxSize = 10;
+		while(count > maxSize)
+			maxSize = maxSize * 10;
+		currentSize = 0;
+		beginPointer = new T[maxSize];
+		for(size_t i = 0; i < count; i++)
 		{
-			currentSize = 0;
-			beginPointer = new T[maxSize];
-			for(size_t i = 0; i < count; i++)
-			{
-				beginPointer[i] = T();
-				currentSize++;
-			}
+			beginPointer[i] = T();
+			currentSize++;
 		}
 	}
 
 	MyVector(const MyVector& other)
 	{
+		maxSize = other.maxSize;
 		currentSize = 0;
 		_Swap(other);	
 	}
 
 	MyVector(MyVector&& other)
 	{
+		maxSize = other.maxSize;
 		currentSize = other.currentSize;
 		beginPointer = other.beginPointer;
+		other.maxSize = 0;
 		other.beginPointer = nullptr;
 		other.currentSize = 0;
 	}
@@ -62,6 +66,7 @@ public:
 		if(this!= &other)
 		{
 			delete[] beginPointer;
+			maxSize = other.maxSize;
 			if(currentSize == other.currentSize)
 				_Swap(other);
 		}
@@ -73,10 +78,12 @@ public:
 		if(this!= &other)
 		{
 			delete[] beginPointer;
+			maxSize = other.maxSize;
 			if(this.currentSize = other.currentSize)
-				this.begiinPointer = other.beginPointer;
+				this.beginPointer = other.beginPointer;
 			other.beginPointer = nullptr;
 			other.currentSize = 0;
+			other.maxSize = 0;
 		}
 		return *this;
 	}		
@@ -99,45 +106,46 @@ public:
 	
 	T* Begin()
 	{
-		if(beginPointer)
-		{
-			return beginPointer;
-		}
+		return beginPointer;
 	}
 
 	T* End()
 	{
-		if(beginPointer)
-		{
-			return &beginPointer[currentSize];
-		}
+		return &beginPointer[currentSize];
 	}
 
 	size_t Size()
 	{
-		if(beginPointer)
-		{
-			return currentSize;
-		}
+		return currentSize;
+	}
+	
+	void OnOversize()
+	{
+		maxSize = maxSize * 10;
+		T* temp = new T[maxSize];
+		for (int i = 0; i < currentSize; i++)
+			temp[i] = std::move(beginPointer[i]);
+		delete[] beginPointer;
+		beginPointer = temp;
 	}
 
 	void PushBack(const T& value)
 	{
-		if(currentSize < maxSize)
+		if(currentSize >= maxSize)
 		{
-			beginPointer[currentSize] = value;
-			currentSize ++;
+			OnOversize();
 		}
+		beginPointer[currentSize] = value;
+		currentSize ++;
 	}
 
 	void PushBack(T&& value)
 	{
-		if(currentSize < maxSize)
-		{
-			beginPointer[currentSize] = std::move(value);
-			currentSize ++;
-			value = T();
-		}
+		if(currentSize >= maxSize)
+			OnOversize();
+		beginPointer[currentSize] = std::move(value);
+		currentSize ++;
+		value = T();
 	}
 
 	void PopBack()
