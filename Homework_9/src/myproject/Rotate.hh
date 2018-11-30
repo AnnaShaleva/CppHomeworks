@@ -1,3 +1,11 @@
+/**
+\brief
+This function is aimed to rotate vector in angle which is aliquot with 90 degrees \p
+\date 2018-11-30
+\param[in] source - vector to rotate
+\param[in] degree - angle in degrees
+\return integer result which can be 0 if success or -1 if failed
+*/
 int Rotate(std::vector<int>& source, int degree)
 {
 	int times = degree / 90;
