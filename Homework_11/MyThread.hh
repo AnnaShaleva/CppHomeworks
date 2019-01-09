@@ -1,36 +1,16 @@
+#include <cstddef>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <utility>
+
 template <class Function>
 class MyThread
 {
-	//size_t stack_size = 1024*1024;
-//	char* child_stack;
-//	char* child_stack_end;
-	class id
-	{
-		int threadId;
-public:
-		id() : threadId() { }
-
-		explicit id(int _id)
-		{
-			threadId = _id;
-		}
-
 private:
-		friend class MyThread;
-
-		friend bool operator==(MyThread::id _x, MyThread::id _y)
-		{
-			return _x.threadId == _y.ThreadId;
-		}
-
-		friend bool operator<(MyThread::id _x, MyThread::id _y)
-		{
-			return _x.threadId < _y.threadId;
-		}
-	};
-
-private:
-	id thread_id;
+	pid_t id;
+	char* child_stack;
+	size_t stack_size = 1024*1024;
 
 public:
 	MyThread() = default;
@@ -42,14 +22,10 @@ public:
 
 	explicit MyThread(Function&& f)
 	{
-		//TODO:
-		thread_id = clone(f, child_stack_end, SIGCHLD, 0);
+		child_stack = new char[stack_size];
+		thread_id = clone(f, child_stack + stack_size, CLONE_NEWUTS | CLONE_NEWUSER | SIGCHLD, 0);
 	       	if (thread_id == -1)
-		       //TODO: define exit code
-		       exit(EXIT_FAILURE);
-	       	if(waitpid(thread_id, NULL, 0) == -1)
-			       exit(EXIT_FAILURE);
-	//       	exit(EXIT_SUCCESS);
+			exit(EXIT_FAILURE);
 	}
 
 	MyThread(const MyThread&) = delete;
@@ -57,7 +33,8 @@ public:
 	~MyThread()
 	{
 		if(joinable() == true)
-			std::terminate();
+			kill(id, SIGTERM);
+		delete[] child_stack;
 	}
 
 	MyThread& operator=(const thread&) = delete;
@@ -65,31 +42,35 @@ public:
 	MyThread& operator=(MyThread&& other)
 	{
 		if(joinable())
-			std::terminate;
+			kill(id, SIGTERM);	
 		swap(other);
 		return *this;
 	}
 
 	void join()
 	{
+		waitpid(id, NULL, 0);
 		if (joinable() == false)
-			exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE)
+		else
+			kill(id, SIGTERM);
+		id = 0;
 	}
 
 	void swap(MyThread& other)
 	{
-		//TODO
-		std::swap(thread_id, othrer.get_id());
+		std::swap(id, other.get_id());
+		std::swap(child_stack, other.child_stack);
 	}
 
 	bool joinable() const
 	{
-		return !(get_id() == MyThread::id());
+		return !(id == 0);
 	}
 
-	MyThread::id get_id() const
+	pid_t get_id() const
 	{
-		return thread_id;
+		return id;
 	}
 
 };
