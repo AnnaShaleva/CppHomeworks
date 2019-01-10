@@ -8,8 +8,12 @@ int MyFoo(void*)
 
 int main()
 {
+	std::cout << "1 join" << std::endl;
 	auto t1 = MyThread(MyFoo); 
+	std::cout << "1 join" << std::endl;
 	t1.join();
+
+	std::cout << "1 join" << std::endl;
 
 	auto t2 = MyThread();
 	std::cout << t2.get_id() << std::endl;
@@ -17,10 +21,13 @@ int main()
 	
 	auto t3 = MyThread(MyFoo);
 	std::cout << t3.get_id() << std::endl;
-	t2 = MyThread(std::move(t3));
+
+	t2 = std::move(t3);
+
 	std::cout << "t2 - joinable: " << t2.joinable() << std::endl;
 	std::cout << t2.get_id() << std::endl;
-	
+
+		
 	t2.join();
 	std::cout << "t2 - ojoinable: " << t2.joinable() << std::endl;
 	std::cout << t2.get_id() << std::endl;	

@@ -7,9 +7,16 @@
 
 class MyThread
 {
+#define CHECK(func) \
+	if ((func) == -1) \
+	{\
+		std::cout << __LINE__ <<std::endl; \
+		throw std::system_error(errno, std::generic_category()); \
+	}
+
 private:
-	pid_t id;
-	char* child_stack;
+	pid_t id = -1;
+	char* child_stack = nullptr;
 	size_t stack_size = 1024*1024;
 
 public:
@@ -23,16 +30,15 @@ public:
 	explicit MyThread(int(*f)(void*))
 	{
 		child_stack = new char[stack_size];
-		id = clone(f, child_stack + stack_size, CLONE_NEWUTS | CLONE_NEWUSER | SIGCHLD, 0);
-	       	if (id == -1)
-			exit(EXIT_FAILURE);
+		id = clone(f, child_stack + stack_size, CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | SIGCHLD, 0);
+		CHECK(id);
 	}
 
 	MyThread(const MyThread&) = delete;
 
 	~MyThread()
 	{
-		if(joinable() == true)
+		if(id != -1)
 			kill(id, SIGTERM);
 		delete[] child_stack;
 	}
@@ -41,20 +47,13 @@ public:
 
 	MyThread& operator=(MyThread&& other)
 	{
-		if(joinable())
-			kill(id, SIGTERM);	
 		swap(other);
 		return *this;
 	}
 
 	void join()
 	{
-		waitpid(id, NULL, 0);
-		if (joinable() == false)
-			exit(EXIT_FAILURE);
-		else
-			kill(id, SIGTERM);
-		id = 0;
+		CHECK(waitpid(id, NULL, 0));
 	}
 
 	void swap(MyThread& other)
@@ -66,7 +65,7 @@ public:
 
 	bool joinable() const
 	{
-		return !(id == 0);
+		return kill(id, 0) == 0;		
 	}
 
 	pid_t get_id() const
