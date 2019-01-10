@@ -1,4 +1,5 @@
 /**
+\file
 \brief
 This function is aimed to rotate vector in angle which is aliquot with 90 degrees \p
 \date 2018-11-30
