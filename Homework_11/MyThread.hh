@@ -2,9 +2,9 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <utility>
 
-template <class Function>
 class MyThread
 {
 private:
@@ -20,11 +20,11 @@ public:
 		swap(other);
 	}
 
-	explicit MyThread(Function&& f)
+	explicit MyThread(int(*f)(void*))
 	{
 		child_stack = new char[stack_size];
-		thread_id = clone(f, child_stack + stack_size, CLONE_NEWUTS | CLONE_NEWUSER | SIGCHLD, 0);
-	       	if (thread_id == -1)
+		id = clone(f, child_stack + stack_size, CLONE_NEWUTS | CLONE_NEWUSER | SIGCHLD, 0);
+	       	if (id == -1)
 			exit(EXIT_FAILURE);
 	}
 
@@ -37,7 +37,7 @@ public:
 		delete[] child_stack;
 	}
 
-	MyThread& operator=(const thread&) = delete;
+	MyThread& operator=(const MyThread&) = delete;
 
 	MyThread& operator=(MyThread&& other)
 	{
@@ -51,7 +51,7 @@ public:
 	{
 		waitpid(id, NULL, 0);
 		if (joinable() == false)
-			exit(EXIT_FAILURE)
+			exit(EXIT_FAILURE);
 		else
 			kill(id, SIGTERM);
 		id = 0;
@@ -59,8 +59,9 @@ public:
 
 	void swap(MyThread& other)
 	{
-		std::swap(id, other.get_id());
+		std::swap(id, other.id);
 		std::swap(child_stack, other.child_stack);
+		std::swap(stack_size, other.stack_size);
 	}
 
 	bool joinable() const
